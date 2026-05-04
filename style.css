@@ -87,13 +87,26 @@ ul {
 
 /* For mobile responsiveness */
 @media (max-width: 768px) {
+    .hero .container {
+        grid-template-columns: 1fr;
+        grid-template-areas: 
+            "text"
+            "image"
+            "buttons";
+        text-align: center;
+        gap: 30px;
+    }
+    
     .hero-buttons {
-        flex-direction: column;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
         gap: 15px;
     }
     
     .hero-buttons .btn {
-        width: 100%;
+        width: auto;
+        min-width: 140px;
         text-align: center;
         justify-content: center;
     }
@@ -180,9 +193,11 @@ header {
     left: 0;
     width: 100%;
     z-index: 1000;
-    background: rgba(255, 255, 255, 0.95);
-    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
-    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.5);
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.05);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 nav {
@@ -200,6 +215,7 @@ nav {
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
+    letter-spacing: 1px;
 }
 
 .logo span {
@@ -287,28 +303,66 @@ Hero Section
 }
 
 .hero .container {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas: 
+        "text image"
+        "buttons image";
     align-items: center;
-    justify-content: space-between;
-    gap: 50px;
+    gap: 20px 50px;
     position: relative;
     z-index: 1;
 }
 
 .hero-content {
-    flex: 1;
+    grid-area: text;
 }
 
-.hero-title {
+.hero-greeting {
     font-size: 3.5rem;
     font-weight: 700;
-    margin-bottom: 20px;
-    color: var(--dark);
+    color: var(--purple);
+    margin-bottom: 5px;
+    letter-spacing: 1px;
+}
+
+.hero-name {
+    font-size: 3.5rem;
+    font-weight: 700;
+    margin-bottom: 5px;
     line-height: 1.2;
     background: var(--gradient-primary);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
+}
+
+.hero-subtitle {
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 25px;
+}
+
+.typewriter-text {
+    background: var(--gradient-secondary);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    font-weight: 700;
+}
+
+.cursor {
+    display: inline-block;
+    width: 3px;
+    background-color: var(--purple);
+    animation: blink 1s infinite;
+    margin-left: 2px;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
 }
 
 .hero-description {
@@ -318,12 +372,13 @@ Hero Section
 }
 
 .hero-buttons {
+    grid-area: buttons;
     display: flex;
     gap: 15px;
 }
 
 .hero-image {
-    flex: 1;
+    grid-area: image;
     display: flex;
     justify-content: center;
     position: relative;
@@ -1238,8 +1293,13 @@ Hero Section
 /* Responsive Design */
 @media (max-width: 992px) {
     .hero .container {
-        flex-direction: column;
+        grid-template-columns: 1fr;
+        grid-template-areas: 
+            "text"
+            "image"
+            "buttons";
         text-align: center;
+        gap: 30px;
     }
     
     .hero-buttons {

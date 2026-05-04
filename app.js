@@ -30,21 +30,51 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Add typing effect to hero title
-    const heroTitle = document.querySelector('.hero-title');
-    const originalText = heroTitle.textContent;
-    heroTitle.textContent = '';
+    // Initialize dynamic typewriter effect
+    initTypewriter();
     
-    let i = 0;
-    const typeWriter = setInterval(function() {
-        if (i < originalText.length) {
-            heroTitle.textContent += originalText.charAt(i);
-            i++;
-        } else {
-            clearInterval(typeWriter);
-        }
-    }, 50);
+    // Initialize 3D tilt effect on hero image
+    initTilt();
 });
+
+// Typewriter Effect
+function initTypewriter() {
+    const textElement = document.querySelector('.typewriter-text');
+    if (!textElement) return;
+    
+    const words = ['Backend Developer', 'AI Engineer'];
+    let wordIndex = 0;
+    let charIndex = 0;
+    let isDeleting = false;
+    
+    function type() {
+        const currentWord = words[wordIndex];
+        
+        if (isDeleting) {
+            textElement.textContent = currentWord.substring(0, charIndex - 1);
+            charIndex--;
+        } else {
+            textElement.textContent = currentWord.substring(0, charIndex + 1);
+            charIndex++;
+        }
+        
+        let typeSpeed = isDeleting ? 50 : 100;
+        
+        if (!isDeleting && charIndex === currentWord.length) {
+            typeSpeed = 2000; // Wait at end of word
+            isDeleting = true;
+        } else if (isDeleting && charIndex === 0) {
+            isDeleting = false;
+            wordIndex = (wordIndex + 1) % words.length;
+            typeSpeed = 500; // Wait before typing next word
+        }
+        
+        setTimeout(type, typeSpeed);
+    }
+    
+    // Start typing effect
+    setTimeout(type, 1000);
+}
 
 
 // Skills Animation
@@ -179,5 +209,37 @@ function initScrollAnimations() {
     
     animatedElements.forEach(el => {
         observer.observe(el);
+    });
+}
+
+// 3D Tilt Effect for Hero Image
+function initTilt() {
+    const container = document.querySelector('.hero-image');
+    const img = document.querySelector('.profile-image');
+    
+    if (!container || !img) return;
+    
+    container.addEventListener('mousemove', (e) => {
+        // Only run on desktop/larger screens to prevent mobile jank
+        if (window.innerWidth < 768) return;
+        
+        const rect = container.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        
+        // Calculate rotation degrees (max 15 degrees)
+        const rotateX = ((y - centerY) / centerY) * -15; 
+        const rotateY = ((x - centerX) / centerX) * 15;
+        
+        img.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+        img.style.transition = 'transform 0.1s ease';
+    });
+    
+    container.addEventListener('mouseleave', () => {
+        img.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+        img.style.transition = 'transform 0.5s ease';
     });
 }
