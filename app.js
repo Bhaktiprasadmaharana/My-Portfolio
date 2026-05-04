@@ -35,6 +35,20 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize 3D tilt effect on hero image
     initTilt();
+    
+    // Initialize 3D tilt effect on skill cards
+    initCardTilt();
+    
+    // Initialize View More buttons
+    initViewMore('.skills-grid', '.skill-card', 'view-more-skills', 4);
+    initViewMore('.projects-grid', '.project-card', 'view-more-projects', 3);
+    
+    // Initialize Project Modal
+    initProjectModal();
+    
+    // Initialize Certificates Slider and PDF Modal
+    initCertSlider();
+    initPdfModal();
 });
 
 // Typewriter Effect
@@ -195,12 +209,21 @@ function initFormHandler() {
 
 // Scroll Animations
 function initScrollAnimations() {
-    const animatedElements = document.querySelectorAll('.skill-progress, .project-card, .about-content, .hero-content');
+    const animatedElements = document.querySelectorAll('.skill-progress, .project-card, .about-content, .hero-content, .education-item');
     
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 entry.target.classList.add('animate');
+                
+                // If it's an education item, animate its progress bar
+                if (entry.target.classList.contains('education-item')) {
+                    const progressBar = entry.target.querySelector('.progress-fill');
+                    if (progressBar) {
+                        const width = progressBar.getAttribute('data-width');
+                        progressBar.style.width = width + '%';
+                    }
+                }
             }
         });
     }, {
@@ -241,5 +264,245 @@ function initTilt() {
     container.addEventListener('mouseleave', () => {
         img.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
         img.style.transition = 'transform 0.5s ease';
+    });
+}
+
+// 3D Tilt Effect for Skill Cards (Inner Content Only)
+function initCardTilt() {
+    const cards = document.querySelectorAll('.skill-card');
+    
+    if (cards.length === 0) return;
+    
+    cards.forEach(card => {
+        const tiltContent = card.querySelector('.tilt-content');
+        if (!tiltContent) return;
+        
+        card.addEventListener('mousemove', (e) => {
+            if (window.innerWidth < 768) return;
+            
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            
+            // Adjust max degrees based on your preference
+            const rotateX = ((y - centerY) / centerY) * -10; 
+            const rotateY = ((x - centerX) / centerX) * 10;
+            
+            tiltContent.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            tiltContent.style.transition = 'transform 0.1s ease';
+        });
+        
+        card.addEventListener('mouseleave', () => {
+            tiltContent.style.transform = 'rotateX(0deg) rotateY(0deg)';
+            tiltContent.style.transition = 'transform 0.5s ease';
+        });
+    });
+}
+
+// View More Button Logic
+function initViewMore(gridSelector, itemSelector, btnId, limit) {
+    const grid = document.querySelector(gridSelector);
+    if (!grid) return;
+    
+    const items = grid.querySelectorAll(itemSelector);
+    const btn = document.getElementById(btnId);
+    
+    // Only show button if we have more items than the limit
+    if (!btn || items.length <= limit) return;
+    
+    // Hide extra items
+    items.forEach((item, index) => {
+        if (index >= limit) {
+            item.style.display = 'none';
+        }
+    });
+    
+    // Show the button
+    btn.parentElement.style.display = 'block';
+    
+    btn.addEventListener('click', () => {
+        const isShowingAll = btn.textContent === 'Show Less';
+        
+        items.forEach((item, index) => {
+            if (index >= limit) {
+                // If hiding, set to 'none', else empty string to restore original display (e.g., flex/block)
+                item.style.display = isShowingAll ? 'none' : '';
+            }
+        });
+        
+        btn.textContent = isShowingAll ? 'View More' : 'Show Less';
+        
+        if (isShowingAll) {
+            // Scroll back up to grid start so user doesn't lose their place
+            grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    });
+}
+
+// Project Modal Logic
+function initProjectModal() {
+    const modal = document.getElementById('project-modal');
+    const closeBtn = document.querySelector('.close-modal');
+    const cards = document.querySelectorAll('.project-card');
+    
+    if (!modal) return;
+    
+    // Modal elements to populate
+    const modalImage = document.getElementById('modal-image');
+    const modalTitle = document.getElementById('modal-title');
+    const modalDescription = document.getElementById('modal-description');
+    const modalTech = document.getElementById('modal-tech');
+    
+    // Open modal on card click
+    cards.forEach(card => {
+        card.addEventListener('click', () => {
+            // Extract data from clicked card
+            const imgEl = card.querySelector('.project-image img');
+            const titleEl = card.querySelector('.project-title');
+            const descEl = card.querySelector('.project-description');
+            const techPills = card.querySelectorAll('.project-tech span');
+            
+            // Populate modal
+            if (imgEl) modalImage.src = imgEl.src;
+            if (titleEl) modalTitle.textContent = titleEl.textContent;
+            if (descEl) modalDescription.textContent = descEl.textContent;
+            
+            // Populate tech pills
+            modalTech.innerHTML = '';
+            techPills.forEach(pill => {
+                const span = document.createElement('span');
+                span.className = 'skill-pill';
+                span.textContent = pill.textContent;
+                modalTech.appendChild(span);
+            });
+            
+            // Show modal
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        });
+    });
+    
+    // Close modal functions
+    const closeModal = () => {
+        modal.classList.remove('show');
+        document.body.style.overflow = ''; // Restore background scrolling
+    };
+    
+    if (closeBtn) {
+        closeBtn.addEventListener('click', closeModal);
+    }
+    
+    // Close on outside click
+    window.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
+}
+
+// Certificate Slider Logic
+function initCertSlider() {
+    const slider = document.getElementById('cert-slider');
+    const slides = document.querySelectorAll('.cert-slide');
+    const prevBtn = document.getElementById('cert-prev');
+    const nextBtn = document.getElementById('cert-next');
+    const dotsContainer = document.getElementById('cert-dots');
+    
+    if (!slider || slides.length === 0) return;
+    
+    let currentIndex = 0;
+    const totalSlides = slides.length;
+    let autoSlideInterval;
+    
+    // Create dots
+    slides.forEach((_, index) => {
+        const dot = document.createElement('div');
+        dot.classList.add('dot');
+        if (index === 0) dot.classList.add('active');
+        dot.addEventListener('click', () => goToSlide(index));
+        dotsContainer.appendChild(dot);
+    });
+    const dots = document.querySelectorAll('.dot');
+    
+    function updateDots() {
+        dots.forEach(dot => dot.classList.remove('active'));
+        dots[currentIndex].classList.add('active');
+    }
+    
+    function goToSlide(index) {
+        if (index < 0) {
+            currentIndex = totalSlides - 1;
+        } else if (index >= totalSlides) {
+            currentIndex = 0;
+        } else {
+            currentIndex = index;
+        }
+        
+        slider.style.transform = `translateX(-${currentIndex * 100}%)`;
+        updateDots();
+        resetAutoSlide();
+    }
+    
+    function nextSlide() { goToSlide(currentIndex + 1); }
+    function prevSlide() { goToSlide(currentIndex - 1); }
+    
+    // Auto-slide every 6 seconds
+    function startAutoSlide() {
+        autoSlideInterval = setInterval(nextSlide, 6000);
+    }
+    
+    function resetAutoSlide() {
+        clearInterval(autoSlideInterval);
+        startAutoSlide();
+    }
+    
+    // Event listeners
+    if(nextBtn) nextBtn.addEventListener('click', nextSlide);
+    if(prevBtn) prevBtn.addEventListener('click', prevSlide);
+    
+    startAutoSlide();
+}
+
+// PDF Viewer Modal Logic
+function initPdfModal() {
+    const modal = document.getElementById('pdf-modal');
+    const closeBtn = document.getElementById('close-pdf');
+    const iframe = document.getElementById('pdf-viewer');
+    const downloadBtn = document.getElementById('pdf-download-btn');
+    const modalTitle = document.getElementById('pdf-modal-title');
+    const certSlides = document.querySelectorAll('.cert-slide');
+    
+    if (!modal || !iframe) return;
+    
+    certSlides.forEach(slide => {
+        const card = slide.querySelector('.cert-card');
+        card.addEventListener('click', () => {
+            const pdfUrl = slide.getAttribute('data-pdf');
+            const title = slide.getAttribute('data-title');
+            
+            if (pdfUrl && pdfUrl !== '#') {
+                iframe.src = pdfUrl;
+                if (downloadBtn) downloadBtn.href = pdfUrl;
+                if (modalTitle) modalTitle.textContent = title || 'Certificate';
+                
+                modal.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            }
+        });
+    });
+    
+    const closeModal = () => {
+        modal.classList.remove('show');
+        document.body.style.overflow = '';
+        setTimeout(() => { iframe.src = ''; }, 300); // Clear iframe memory after animation
+    };
+    
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
+    
+    window.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
     });
 }
