@@ -128,9 +128,7 @@ function initFormHandler() {
                 submitBtn.textContent = 'Sending...';
                 submitBtn.disabled = true;
                 
-                // Send email using EmailJS
-                // serviceID: 'service_dlv766c', templateID: 'YOUR_TEMPLATE_ID'
-                emailjs.sendForm('service_dlv766c', 'YOUR_TEMPLATE_ID', this)
+                emailjs.sendForm('service_xjowin9', 'template_5y4uie6', this)
                     .then(() => {
                         Toastify({
                             text: "Message sent successfully!",
