@@ -102,7 +102,7 @@ function initMobileMenu() {
 
 // Form Handler
 function initFormHandler() {
-    const contactForm = document.querySelector('.contact-form');
+    const contactForm = document.getElementById('contact-form');
     
     if (contactForm) {
         contactForm.addEventListener('submit', function(e) {
@@ -122,19 +122,44 @@ function initFormHandler() {
             });
             
             if (isValid) {
-                // Simulate form submission
                 const submitBtn = this.querySelector('button');
                 const originalText = submitBtn.textContent;
                 
                 submitBtn.textContent = 'Sending...';
                 submitBtn.disabled = true;
                 
-                setTimeout(() => {
-                    alert('Message sent successfully!');
-                    this.reset();
-                    submitBtn.textContent = originalText;
-                    submitBtn.disabled = false;
-                }, 1500);
+                // Send email using EmailJS
+                // serviceID: 'service_dlv766c', templateID: 'YOUR_TEMPLATE_ID'
+                emailjs.sendForm('service_dlv766c', 'YOUR_TEMPLATE_ID', this)
+                    .then(() => {
+                        Toastify({
+                            text: "Message sent successfully!",
+                            duration: 3000,
+                            close: true,
+                            gravity: "top",
+                            position: "right",
+                            style: {
+                                background: "linear-gradient(to right, #00b09b, #96c93d)",
+                            }
+                        }).showToast();
+                        this.reset();
+                        submitBtn.textContent = originalText;
+                        submitBtn.disabled = false;
+                    }, (error) => {
+                        console.error('FAILED...', error);
+                        Toastify({
+                            text: "Failed to send message. Please try again.",
+                            duration: 3000,
+                            close: true,
+                            gravity: "top",
+                            position: "right",
+                            style: {
+                                background: "linear-gradient(to right, #ff5f6d, #ffc371)",
+                            }
+                        }).showToast();
+                        submitBtn.textContent = originalText;
+                        submitBtn.disabled = false;
+                    });
             }
         });
     }
