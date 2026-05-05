@@ -378,12 +378,36 @@ function initProjectModal() {
                 span.textContent = pill.textContent;
                 modalTech.appendChild(span);
             });
+
+            // Update modal action buttons from data attributes
+            const liveLink = card.getAttribute('data-live');
+            const codeLink = card.getAttribute('data-code');
+            const modalViewLive = document.getElementById('modal-view-live');
+            const modalViewCode = document.getElementById('modal-view-code');
+
+            if (modalViewLive) {
+                if (liveLink) {
+                    modalViewLive.href = liveLink;
+                    modalViewLive.style.display = '';
+                } else {
+                    modalViewLive.style.display = 'none';
+                }
+            }
+            if (modalViewCode) {
+                if (codeLink) {
+                    modalViewCode.href = codeLink;
+                    modalViewCode.style.display = '';
+                } else {
+                    modalViewCode.style.display = 'none';
+                }
+            }
             
             // Show modal
             modal.classList.add('show');
             document.body.style.overflow = 'hidden'; // Prevent background scrolling
         });
     });
+
     
     // Close modal functions
     const closeModal = () => {
